@@ -11,7 +11,8 @@ from mcp_hub.models import ServerSpec
 
 
 class AddWizardScreen(Screen):
-    BINDINGS = [("escape", "app.pop_screen", "Cancel")]
+    _BINDING_SPEC = [("escape", "app.pop_screen", "key_cancel")]
+    BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
 
     class WizardDone(Message):
         pass

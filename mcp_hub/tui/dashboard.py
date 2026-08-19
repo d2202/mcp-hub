@@ -8,7 +8,8 @@ from mcp_hub.i18n import t
 
 
 class DashboardScreen(Screen):
-    BINDINGS = [("q", "app.quit", "Quit")]
+    _BINDING_SPEC = [("q", "app.quit", "key_quit")]
+    BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
 
     class AgentSelected(Message):
         def __init__(self, adapter: AgentAdapter) -> None:

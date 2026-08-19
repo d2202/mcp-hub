@@ -8,11 +8,12 @@ from mcp_hub.i18n import t
 
 
 class ServerListScreen(Screen):
-    BINDINGS = [
-        ("escape", "app.pop_screen", "Back"),
-        ("a", "add", "Add server"),
-        ("r", "remove", "Remove selected"),
+    _BINDING_SPEC = [
+        ("escape", "app.pop_screen", "key_back"),
+        ("a", "add", "key_add_server"),
+        ("r", "remove", "key_remove_selected"),
     ]
+    BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
 
     class OpenAddWizard(Message):
         def __init__(self, adapter: AgentAdapter) -> None:

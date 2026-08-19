@@ -4,6 +4,13 @@ from pathlib import Path
 SETTINGS_PATH = Path.home() / ".config" / "mcp-hub" / "settings.json"
 
 STRINGS: dict[str, dict[str, str]] = {
+    "key_quit": {"en": "Quit", "ru": "Выход"},
+    "key_back": {"en": "Back", "ru": "Назад"},
+    "key_add_server": {"en": "Add server", "ru": "Добавить сервер"},
+    "key_remove_selected": {"en": "Remove selected", "ru": "Удалить выбранное"},
+    "key_cancel": {"en": "Cancel", "ru": "Отмена"},
+    "key_language": {"en": "Language", "ru": "Язык"},
+    "key_help": {"en": "Help", "ru": "Справка"},
     "dashboard_title": {"en": "Agents", "ru": "Агенты"},
     "col_agent": {"en": "Agent", "ru": "Агент"},
     "col_detected": {"en": "Detected", "ru": "Найден"},
@@ -109,3 +116,14 @@ def set_language(language: str) -> None:
 
 def toggle_language() -> None:
     set_language("ru" if _current_language == "en" else "en")
+
+
+def retranslate_bindings(cls) -> None:
+    """Rebuild a Textual DOMNode class's footer key hints in the current
+    language. Bindings are normally baked into `cls.BINDINGS` once at
+    import time and cached on `cls._merged_bindings`; this recomputes
+    both from `cls._BINDING_SPEC` (key, action, i18n_key) so the footer
+    reflects a language change without restarting the app.
+    """
+    cls.BINDINGS = [(key, action, t(i18n_key)) for key, action, i18n_key in cls._BINDING_SPEC]
+    cls._merged_bindings = cls._merge_bindings()

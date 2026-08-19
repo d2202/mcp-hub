@@ -7,7 +7,8 @@ from mcp_hub.i18n import t
 
 
 class HelpScreen(Screen):
-    BINDINGS = [("escape", "app.pop_screen", "Back")]
+    _BINDING_SPEC = [("escape", "app.pop_screen", "key_back")]
+    BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
 
     def compose(self) -> ComposeResult:
         yield Header()
