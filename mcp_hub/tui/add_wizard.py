@@ -10,6 +10,20 @@ from mcp_hub.i18n import t
 from mcp_hub.models import ServerSpec
 
 
+def parse_env_input(text: str) -> dict[str, str]:
+    """Parse a space-separated "KEY=value KEY2=value2" string into a dict.
+    Tokens without "=" are ignored; only the first "=" splits key from
+    value, so values may contain "=" themselves (e.g. URLs).
+    """
+    env: dict[str, str] = {}
+    for token in text.split():
+        if "=" not in token:
+            continue
+        key, _, value = token.partition("=")
+        env[key] = value
+    return env
+
+
 class AddWizardScreen(Screen):
     _BINDING_SPEC = [("escape", "app.pop_screen", "key_cancel")]
     BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
@@ -36,6 +50,8 @@ class AddWizardScreen(Screen):
             yield Input(id="command-input")
             yield Label(t("label_args"))
             yield Input(id="args-input")
+            yield Label(t("label_env"))
+            yield Input(id="env-input")
             yield Static(t("wizard_targets_prompt"))
             yield SelectionList[str](
                 *[(a.name, a.name, True) for a in self._adapters],
@@ -54,6 +70,7 @@ class AddWizardScreen(Screen):
         self.query_one("#name-input", Input).value = spec.name
         self.query_one("#command-input", Input).value = spec.command
         self.query_one("#args-input", Input).value = " ".join(spec.args)
+        self.query_one("#env-input", Input).value = " ".join(f"{k}=" for k in spec.env)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id != "submit":
@@ -62,10 +79,11 @@ class AddWizardScreen(Screen):
         name = self.query_one("#name-input", Input).value.strip()
         command = self.query_one("#command-input", Input).value.strip()
         args = self.query_one("#args-input", Input).value.split()
+        env = parse_env_input(self.query_one("#env-input", Input).value)
         if not name or not command:
             return
 
-        spec = ServerSpec(name=name, command=command, args=args, env={})
+        spec = ServerSpec(name=name, command=command, args=args, env=env)
         targets = self.query_one("#agent-pick", SelectionList).selected
         for adapter in self._adapters:
             if adapter.name in targets:

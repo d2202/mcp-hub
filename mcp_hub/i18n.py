@@ -26,6 +26,10 @@ STRINGS: dict[str, dict[str, str]] = {
     "label_name": {"en": "Name", "ru": "Имя"},
     "label_command": {"en": "Command", "ru": "Команда"},
     "label_args": {"en": "Args (space-separated)", "ru": "Аргументы (через пробел)"},
+    "label_env": {
+        "en": "Env (KEY=value, space-separated)",
+        "ru": "Переменные окружения (KEY=value, через пробел)",
+    },
     "wizard_targets_prompt": {
         "en": "Target agents (detected only):",
         "ru": "Целевые агенты (только найденные):",
