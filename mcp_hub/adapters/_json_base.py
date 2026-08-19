@@ -25,15 +25,23 @@ class JsonMcpServersAdapter:
                 valid=False, error=str(exc),
             )]
 
+        servers = data.get("mcpServers")
+        if not isinstance(servers, dict):
+            servers = {}
+
         entries = []
-        for name, cfg in data.get("mcpServers", {}).items():
+        for name, cfg in servers.items():
             try:
-                entries.append(ServerEntry(
-                    name=name,
-                    command=cfg.get("command") or "",
-                    args=list(cfg.get("args") or []),
-                    env=dict(cfg.get("env") or {}),
-                ))
+                command = cfg.get("command") or ""
+                args = list(cfg.get("args") or [])
+                env = dict(cfg.get("env") or {})
+                if not isinstance(command, str):
+                    raise TypeError(f"command must be a string, got {type(command).__name__}")
+                if not all(isinstance(a, str) for a in args):
+                    raise TypeError("args must all be strings")
+                if not all(isinstance(v, str) for v in env.values()):
+                    raise TypeError("env values must all be strings")
+                entries.append(ServerEntry(name=name, command=command, args=args, env=env))
             except (AttributeError, TypeError) as exc:
                 entries.append(ServerEntry(
                     name=name, command="", args=[], env={},
@@ -43,7 +51,9 @@ class JsonMcpServersAdapter:
 
     def add_server(self, spec: ServerSpec) -> None:
         data = self._load()
-        data.setdefault("mcpServers", {})[spec.name] = {
+        if not isinstance(data.get("mcpServers"), dict):
+            data["mcpServers"] = {}
+        data["mcpServers"][spec.name] = {
             "command": spec.command,
             "args": spec.args,
             "env": spec.env,
@@ -52,7 +62,9 @@ class JsonMcpServersAdapter:
 
     def remove_server(self, name: str) -> None:
         data = self._load()
-        data.get("mcpServers", {}).pop(name, None)
+        servers = data.get("mcpServers")
+        if isinstance(servers, dict):
+            servers.pop(name, None)
         self._backup_and_write(json.dumps(data, indent=2) + "\n")
 
     def _backup_and_write(self, text: str) -> None:

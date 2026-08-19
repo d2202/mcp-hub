@@ -28,15 +28,23 @@ class CodexAdapter:
                 valid=False, error=str(exc),
             )]
 
+        servers = doc.get("mcp_servers")
+        if not hasattr(servers, "items"):
+            servers = {}
+
         entries = []
-        for name, cfg in doc.get("mcp_servers", {}).items():
+        for name, cfg in servers.items():
             try:
-                entries.append(ServerEntry(
-                    name=name,
-                    command=cfg.get("command") or "",
-                    args=list(cfg.get("args") or []),
-                    env=dict(cfg.get("env") or {}),
-                ))
+                command = cfg.get("command") or ""
+                args = list(cfg.get("args") or [])
+                env = dict(cfg.get("env") or {})
+                if not isinstance(command, str):
+                    raise TypeError(f"command must be a string, got {type(command).__name__}")
+                if not all(isinstance(a, str) for a in args):
+                    raise TypeError("args must all be strings")
+                if not all(isinstance(v, str) for v in env.values()):
+                    raise TypeError("env values must all be strings")
+                entries.append(ServerEntry(name=name, command=command, args=args, env=env))
             except (AttributeError, TypeError) as exc:
                 entries.append(ServerEntry(
                     name=name, command="", args=[], env={},
@@ -46,7 +54,7 @@ class CodexAdapter:
 
     def add_server(self, spec: ServerSpec) -> None:
         doc = self._load()
-        if "mcp_servers" not in doc:
+        if not hasattr(doc.get("mcp_servers"), "items"):
             doc["mcp_servers"] = tomlkit.table(is_super_table=True)
 
         table = tomlkit.table()
@@ -61,7 +69,7 @@ class CodexAdapter:
     def remove_server(self, name: str) -> None:
         doc = self._load()
         servers = doc.get("mcp_servers")
-        if servers is not None and name in servers:
+        if hasattr(servers, "items") and name in servers:
             del servers[name]
         self._backup_and_write(tomlkit.dumps(doc))
 

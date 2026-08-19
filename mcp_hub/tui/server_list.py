@@ -5,6 +5,7 @@ from textual.widgets import DataTable, Footer, Header
 
 from mcp_hub.adapters import AgentAdapter
 from mcp_hub.i18n import t
+from mcp_hub.tui.confirm import ConfirmScreen
 
 
 class ServerListScreen(Screen):
@@ -61,4 +62,13 @@ class ServerListScreen(Screen):
         if table.cursor_row is None:
             return
         row_key = table.coordinate_to_cell_key(table.cursor_coordinate).row_key
-        self.post_message(self.RemoveRequested(self.adapter, row_key.value))
+        server_name = row_key.value
+
+        def handle_confirm(confirmed: bool | None) -> None:
+            if confirmed:
+                self.post_message(self.RemoveRequested(self.adapter, server_name))
+
+        self.app.push_screen(
+            ConfirmScreen(t("confirm_remove").format(name=server_name)),
+            handle_confirm,
+        )

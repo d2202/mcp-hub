@@ -35,6 +35,12 @@ STRINGS: dict[str, dict[str, str]] = {
         "ru": "Целевые агенты (только найденные):",
     },
     "btn_add": {"en": "Add", "ru": "Добавить"},
+    "btn_yes": {"en": "Yes", "ru": "Да"},
+    "btn_no": {"en": "No", "ru": "Нет"},
+    "confirm_remove": {
+        "en": "Remove server '{name}'? A .bak copy of the config is kept.",
+        "ru": "Удалить сервер '{name}'? Сохранится .bak копия конфига.",
+    },
     "help_title": {"en": "mcp-hub help", "ru": "Справка mcp-hub"},
     "help_body": {
         "en": (

@@ -75,6 +75,41 @@ def test_add_server_on_empty_file_creates_table(tmp_path):
     assert entries[0].command == "docker"
 
 
+def test_list_servers_treats_non_table_mcp_servers_as_empty(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text('mcp_servers = "oops"\n')
+
+    entries = CodexAdapter(config_path=path).list_servers()
+
+    assert entries == []
+
+
+def test_add_server_recovers_from_non_table_mcp_servers(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text('mcp_servers = "oops"\n')
+
+    adapter = CodexAdapter(config_path=path)
+    adapter.add_server(ServerSpec(name="new", command="npx", args=[], env={}))
+
+    entries = adapter.list_servers()
+    assert entries[0].name == "new"
+
+
+def test_list_servers_flags_non_string_args_instead_of_crashing(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(
+        "[mcp_servers.bad]\n"
+        'command = "npx"\n'
+        "args = [1, 2]\n"
+    )
+
+    entries = CodexAdapter(config_path=path).list_servers()
+
+    assert len(entries) == 1
+    assert entries[0].valid is False
+    assert entries[0].error is not None
+
+
 def test_list_servers_flags_one_broken_entry_without_losing_others(tmp_path):
     path = tmp_path / "config.toml"
     path.write_text(

@@ -103,6 +103,81 @@ def test_add_server_on_empty_file_creates_mcp_servers_object(tmp_path):
     assert data["mcpServers"]["github"]["command"] == "docker"
 
 
+def test_list_servers_treats_null_mcp_servers_container_as_empty(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({"mcpServers": None}))
+
+    entries = DummyAdapter(path).list_servers()
+
+    assert entries == []
+
+
+def test_add_server_recovers_from_null_mcp_servers_container(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({"mcpServers": None, "otherKey": "untouched"}))
+
+    adapter = DummyAdapter(path)
+    adapter.add_server(ServerSpec(name="new", command="npx", args=[], env={}))
+
+    data = json.loads(path.read_text())
+    assert data["mcpServers"]["new"]["command"] == "npx"
+    assert data["otherKey"] == "untouched"
+
+
+def test_remove_server_recovers_from_null_mcp_servers_container(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({"mcpServers": None}))
+
+    adapter = DummyAdapter(path)
+    adapter.remove_server("whatever")  # must not raise
+
+    data = json.loads(path.read_text())
+    assert data["mcpServers"] is None
+
+
+def test_list_servers_flags_non_string_args_instead_of_crashing(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({
+        "mcpServers": {
+            "bad-args": {"command": "npx", "args": [1, 2], "env": {}},
+        },
+    }))
+
+    entries = DummyAdapter(path).list_servers()
+
+    assert len(entries) == 1
+    assert entries[0].valid is False
+    assert entries[0].error is not None
+
+
+def test_list_servers_flags_non_string_command_instead_of_crashing(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({
+        "mcpServers": {
+            "bad-command": {"command": True, "args": [], "env": {}},
+        },
+    }))
+
+    entries = DummyAdapter(path).list_servers()
+
+    assert len(entries) == 1
+    assert entries[0].valid is False
+
+
+def test_list_servers_flags_non_string_env_values_instead_of_crashing(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({
+        "mcpServers": {
+            "bad-env": {"command": "npx", "args": [], "env": {"KEY": 5}},
+        },
+    }))
+
+    entries = DummyAdapter(path).list_servers()
+
+    assert len(entries) == 1
+    assert entries[0].valid is False
+
+
 def test_add_server_writes_new_entry_and_backup(config_path):
     adapter = DummyAdapter(config_path)
     adapter.add_server(ServerSpec(name="new", command="npx", args=["-y", "pkg"], env={"KEY": "val"}))
