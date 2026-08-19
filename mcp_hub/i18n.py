@@ -1,7 +1,4 @@
-import json
-from pathlib import Path
-
-SETTINGS_PATH = Path.home() / ".config" / "mcp-hub" / "settings.json"
+from mcp_hub import settings
 
 STRINGS: dict[str, dict[str, str]] = {
     "key_quit": {"en": "Quit", "ru": "Выход"},
@@ -54,10 +51,12 @@ STRINGS: dict[str, dict[str, str]] = {
             "  r      - remove the selected server (from a server list)\n"
             "  l      - toggle language (English / Russian)\n"
             "  ?      - this help screen\n"
+            "  ctrl+p - command palette (change theme and more)\n"
             "  escape - go back\n"
             "  q      - quit\n\n"
             "Every add or remove writes a .bak copy of the config file "
-            "before changing it."
+            "before changing it. The chosen language and theme are "
+            "remembered for the next run."
         ),
         "ru": (
             "mcp-hub определяет, какие AI-агенты установлены на этой "
@@ -77,9 +76,11 @@ STRINGS: dict[str, dict[str, str]] = {
             "  r      - удалить выбранный сервер (из списка серверов)\n"
             "  l      - переключить язык (English / Русский)\n"
             "  ?      - этот экран справки\n"
+            "  ctrl+p - палитра команд (смена темы и не только)\n"
             "  escape - назад\n"
             "  q      - выход\n\n"
-            "Перед каждой записью/удалением делается .bak копия конфига."
+            "Перед каждой записью/удалением делается .bak копия конфига. "
+            "Выбранные язык и тема запоминаются до следующего запуска."
         ),
     },
 }
@@ -98,20 +99,15 @@ def t(key: str) -> str:
 def load_language() -> None:
     global _current_language
     _current_language = "en"
-    if SETTINGS_PATH.exists():
-        try:
-            data = json.loads(SETTINGS_PATH.read_text())
-            if data.get("language") in ("en", "ru"):
-                _current_language = data["language"]
-        except (OSError, json.JSONDecodeError):
-            pass
+    language = settings.load().get("language")
+    if language in ("en", "ru"):
+        _current_language = language
 
 
 def set_language(language: str) -> None:
     global _current_language
     _current_language = language
-    SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SETTINGS_PATH.write_text(json.dumps({"language": language}))
+    settings.save(language=language)
 
 
 def toggle_language() -> None:

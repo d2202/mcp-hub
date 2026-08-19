@@ -1,6 +1,6 @@
 from textual.app import App
 
-from mcp_hub import i18n
+from mcp_hub import i18n, settings
 from mcp_hub.i18n import t
 from mcp_hub.tui.add_wizard import AddWizardScreen
 from mcp_hub.tui.dashboard import DashboardScreen
@@ -12,7 +12,6 @@ _TRANSLATABLE_SCREENS = (DashboardScreen, ServerListScreen, AddWizardScreen, Hel
 
 class McpHubApp(App):
     TITLE = "mcp-hub"
-    ENABLE_COMMAND_PALETTE = False
     _BINDING_SPEC = [
         ("l", "toggle_language", "key_language"),
         ("?", "help", "key_help"),
@@ -22,7 +21,15 @@ class McpHubApp(App):
     def on_mount(self) -> None:
         i18n.load_language()
         self._retranslate_all_bindings()
+
+        saved_theme = settings.load().get("theme")
+        if saved_theme and saved_theme in self.available_themes:
+            self.theme = saved_theme
+
         self.push_screen(DashboardScreen())
+
+    def watch_theme(self, old_theme: str, new_theme: str) -> None:
+        settings.save(theme=new_theme)
 
     def on_dashboard_screen_agent_selected(self, message: DashboardScreen.AgentSelected) -> None:
         self.push_screen(ServerListScreen(message.adapter))
@@ -52,9 +59,13 @@ class McpHubApp(App):
             i18n.retranslate_bindings(cls)
         # McpHubApp is a long-lived singleton (unlike screens, which get
         # recreated on toggle): its own `_bindings` was copied from
-        # `_merged_bindings` once at construction, so it needs a direct
-        # refresh here too.
-        self._bindings = McpHubApp._merged_bindings.copy()
+        # `_merged_bindings` once at construction, so our own keys need a
+        # direct refresh here too. Patch only the keys we own (by key,
+        # not by wholesale replacement) so Textual's own instance-level
+        # binding for ctrl+p (the command palette, added in App.__init__
+        # and never present on the class) survives untouched.
+        for key, bindings in McpHubApp._merged_bindings.key_to_bindings.items():
+            self._bindings.key_to_bindings[key] = list(bindings)
 
     def _rebuild_current_screen(self) -> None:
         screen = self.screen

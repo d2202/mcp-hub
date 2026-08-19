@@ -1,23 +1,23 @@
 import json
 
-from mcp_hub import i18n
+from mcp_hub import i18n, settings
 
 
 def test_default_language_is_en(tmp_path, monkeypatch):
-    monkeypatch.setattr(i18n, "SETTINGS_PATH", tmp_path / "settings.json")
+    monkeypatch.setattr(settings, "SETTINGS_PATH", tmp_path / "settings.json")
     i18n.load_language()
     assert i18n.get_language() == "en"
 
 
 def test_t_returns_english_by_default(tmp_path, monkeypatch):
-    monkeypatch.setattr(i18n, "SETTINGS_PATH", tmp_path / "settings.json")
+    monkeypatch.setattr(settings, "SETTINGS_PATH", tmp_path / "settings.json")
     i18n.load_language()
     assert i18n.t("help_title") == "mcp-hub help"
 
 
 def test_set_language_switches_and_persists(tmp_path, monkeypatch):
     settings_path = tmp_path / "settings.json"
-    monkeypatch.setattr(i18n, "SETTINGS_PATH", settings_path)
+    monkeypatch.setattr(settings, "SETTINGS_PATH", settings_path)
     i18n.load_language()
 
     i18n.set_language("ru")
@@ -30,7 +30,7 @@ def test_set_language_switches_and_persists(tmp_path, monkeypatch):
 def test_load_language_reads_persisted_choice(tmp_path, monkeypatch):
     settings_path = tmp_path / "settings.json"
     settings_path.write_text(json.dumps({"language": "ru"}))
-    monkeypatch.setattr(i18n, "SETTINGS_PATH", settings_path)
+    monkeypatch.setattr(settings, "SETTINGS_PATH", settings_path)
 
     i18n.load_language()
 
@@ -38,7 +38,7 @@ def test_load_language_reads_persisted_choice(tmp_path, monkeypatch):
 
 
 def test_toggle_language_flips_between_en_and_ru(tmp_path, monkeypatch):
-    monkeypatch.setattr(i18n, "SETTINGS_PATH", tmp_path / "settings.json")
+    monkeypatch.setattr(settings, "SETTINGS_PATH", tmp_path / "settings.json")
     i18n.load_language()
 
     i18n.toggle_language()
@@ -46,3 +46,16 @@ def test_toggle_language_flips_between_en_and_ru(tmp_path, monkeypatch):
 
     i18n.toggle_language()
     assert i18n.get_language() == "en"
+
+
+def test_set_language_preserves_other_settings_keys(tmp_path, monkeypatch):
+    settings_path = tmp_path / "settings.json"
+    monkeypatch.setattr(settings, "SETTINGS_PATH", settings_path)
+    settings.save(theme="textual-light")
+
+    i18n.set_language("ru")
+
+    assert json.loads(settings_path.read_text()) == {
+        "theme": "textual-light",
+        "language": "ru",
+    }
