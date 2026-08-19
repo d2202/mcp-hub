@@ -6,6 +6,7 @@ from textual.widgets import Button, Footer, Header, Input, Label, SelectionList,
 
 from mcp_hub.adapters import get_adapters
 from mcp_hub.catalog import load_catalog
+from mcp_hub.i18n import t
 from mcp_hub.models import ServerSpec
 
 
@@ -23,23 +24,23 @@ class AddWizardScreen(Screen):
     def compose(self) -> ComposeResult:
         yield Header()
         with Vertical():
-            yield Static("Pick from catalog (or leave blank for custom):")
+            yield Static(t("wizard_catalog_prompt"))
             yield SelectionList[str](
                 *[(spec.name, spec.name) for spec in self._catalog],
                 id="catalog-pick",
             )
-            yield Label("Name")
+            yield Label(t("label_name"))
             yield Input(id="name-input")
-            yield Label("Command")
+            yield Label(t("label_command"))
             yield Input(id="command-input")
-            yield Label("Args (space-separated)")
+            yield Label(t("label_args"))
             yield Input(id="args-input")
-            yield Static("Target agents (detected only):")
+            yield Static(t("wizard_targets_prompt"))
             yield SelectionList[str](
                 *[(a.name, a.name, True) for a in self._adapters],
                 id="agent-pick",
             )
-            yield Button("Add", id="submit", variant="primary")
+            yield Button(t("btn_add"), id="submit", variant="primary")
         yield Footer()
 
     def on_selection_list_selected_changed(self, event: SelectionList.SelectedChanged) -> None:

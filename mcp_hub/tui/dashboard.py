@@ -4,6 +4,7 @@ from textual.screen import Screen
 from textual.widgets import DataTable, Footer, Header
 
 from mcp_hub.adapters import AgentAdapter, get_adapters
+from mcp_hub.i18n import t
 
 
 class DashboardScreen(Screen):
@@ -24,15 +25,18 @@ class DashboardScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        self.sub_title = t("dashboard_title")
         table = self.query_one(DataTable)
-        table.add_columns("Agent", "Detected", "Servers", "Config Path")
+        table.add_columns(
+            t("col_agent"), t("col_detected"), t("col_servers"), t("col_config_path")
+        )
         table.cursor_type = "row"
         for adapter in self._adapters:
             detected = adapter.detect()
             count = len(adapter.list_servers()) if detected else 0
             table.add_row(
                 adapter.name,
-                "yes" if detected else "no",
+                t("yes") if detected else t("no"),
                 str(count),
                 str(adapter.config_path),
                 key=adapter.name,

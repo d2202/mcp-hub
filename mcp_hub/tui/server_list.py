@@ -4,6 +4,7 @@ from textual.screen import Screen
 from textual.widgets import DataTable, Footer, Header
 
 from mcp_hub.adapters import AgentAdapter
+from mcp_hub.i18n import t
 
 
 class ServerListScreen(Screen):
@@ -34,19 +35,20 @@ class ServerListScreen(Screen):
         yield Footer()
 
     def on_mount(self) -> None:
+        self.sub_title = self.adapter.name
         self._refresh_table()
 
     def _refresh_table(self) -> None:
         table = self.query_one(DataTable)
         table.clear(columns=True)
-        table.add_columns("Name", "Command", "Args", "Valid")
+        table.add_columns(t("col_name"), t("col_command"), t("col_args"), t("col_valid"))
         table.cursor_type = "row"
         for entry in self.adapter.list_servers():
             table.add_row(
                 entry.name,
                 entry.command,
                 " ".join(entry.args),
-                "yes" if entry.valid else f"no ({entry.error})",
+                t("yes") if entry.valid else f"{t('no')} ({entry.error})",
                 key=entry.name,
             )
 
