@@ -63,6 +63,18 @@ def test_list_servers_flags_malformed_toml(tmp_path):
     assert entries[0].valid is False
 
 
+def test_add_server_on_empty_file_creates_table(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text("")
+
+    adapter = CodexAdapter(config_path=path)
+    adapter.add_server(ServerSpec(name="github", command="docker", args=["run"], env={}))
+
+    entries = adapter.list_servers()
+    assert entries[0].name == "github"
+    assert entries[0].command == "docker"
+
+
 def test_list_servers_flags_one_broken_entry_without_losing_others(tmp_path):
     path = tmp_path / "config.toml"
     path.write_text(

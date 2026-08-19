@@ -13,7 +13,8 @@ class JsonMcpServersAdapter:
         return self.config_path.exists()
 
     def _load(self) -> dict:
-        return json.loads(self.config_path.read_text())
+        text = self.config_path.read_text().strip()
+        return json.loads(text) if text else {}
 
     def list_servers(self) -> list[ServerEntry]:
         try:

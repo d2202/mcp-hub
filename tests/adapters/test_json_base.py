@@ -83,6 +83,26 @@ def test_list_servers_flags_one_broken_entry_without_losing_others(tmp_path):
     assert by_name["broken"].error is not None
 
 
+def test_list_servers_on_empty_file_returns_empty_list(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text("")
+
+    entries = DummyAdapter(path).list_servers()
+
+    assert entries == []
+
+
+def test_add_server_on_empty_file_creates_mcp_servers_object(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text("")
+
+    adapter = DummyAdapter(path)
+    adapter.add_server(ServerSpec(name="github", command="docker", args=["run"], env={}))
+
+    data = json.loads(path.read_text())
+    assert data["mcpServers"]["github"]["command"] == "docker"
+
+
 def test_add_server_writes_new_entry_and_backup(config_path):
     adapter = DummyAdapter(config_path)
     adapter.add_server(ServerSpec(name="new", command="npx", args=["-y", "pkg"], env={"KEY": "val"}))
