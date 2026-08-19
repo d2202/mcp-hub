@@ -3,6 +3,7 @@ name = "mcp-hub"
 version = "0.1.0"
 description = "Detect and manage MCP servers across AI coding agents"
 requires-python = ">=3.11"
+license = "MIT"
 dependencies = [
     "textual>=0.60",
     "tomlkit>=0.12",
