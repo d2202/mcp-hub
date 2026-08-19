@@ -1,12 +1,42 @@
 # mcp-hub
 
-A TUI package manager for MCP servers. It detects which AI coding agents are
-installed on your machine (Claude Code, Codex, Antigravity), shows what MCP
-servers each one already has connected, and lets you add or remove a server
-across every detected agent from one wizard — instead of hand-editing three
-different config files in three different formats.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
-## Install & run
+A TUI package manager for [MCP](https://modelcontextprotocol.io) servers.
+It detects which AI coding agents are installed on your machine (Claude
+Code, Codex, Antigravity), shows what MCP servers each one already has
+connected, and lets you add or remove a server across every detected agent
+from one wizard — instead of hand-editing three different config files in
+three different formats.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Supported Agents](#supported-agents)
+- [Configuration](#configuration)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+- **Auto-detect** — scans for Claude Code, Codex, and Antigravity config
+  files on startup; no setup needed.
+- **One dashboard** — see every agent's MCP servers, and whether its config
+  file even parses, in one table.
+- **Add wizard** — pick a server from the bundled catalog or enter one by
+  hand, choose which detected agents to write it to, confirm.
+- **Safe writes** — every add or remove backs up the config file (`.bak`)
+  before touching it, and never crashes on a malformed or empty config.
+- **Confirm before delete** — removing a server asks first.
+- **i18n** — full English/Russian UI, toggle at runtime with `l`.
+- **Themeable** — built-in Textual command palette (`ctrl+p`); your choice
+  of theme and language persists between runs.
+
+## Installation
 
 ```bash
 git clone git@github.com:d2202/mcp-hub.git
@@ -17,16 +47,18 @@ cd mcp-hub
 `run.sh` creates a `.venv` on first run, installs the package, and launches
 the TUI. Requires Python 3.11+.
 
-## Screens
+## Usage
 
-- **Dashboard** — one row per agent: detected or not, how many servers,
-  where its config file lives. Select a row to open it.
-- **Server List** — the MCP servers configured for that agent. Invalid
-  entries show why parsing failed instead of crashing.
-- **Add Wizard** — pick a server from the bundled catalog or enter one by
-  hand, choose which detected agents to write it to, confirm.
+Launch with `./run.sh`, then:
 
-## Keys
+1. **Dashboard** — one row per agent: detected or not, how many servers,
+   where its config file lives. Select a row to open it.
+2. **Server List** — the MCP servers configured for that agent. Invalid
+   entries show why parsing failed instead of crashing.
+3. **Add Wizard** (`a`) — pick a server from the bundled catalog or enter
+   one by hand, choose target agents, confirm.
+
+### Keybindings
 
 | Key | Action |
 |---|---|
@@ -39,19 +71,23 @@ the TUI. Requires Python 3.11+.
 | `escape` | go back |
 | `q` | quit |
 
-Every add or remove writes a `.bak` copy of the config file first. Language
-and theme are remembered between runs (`~/.config/mcp-hub/settings.json`).
+## Supported Agents
 
-## Supported agents
+| Agent | Config file | Format |
+|---|---|---|
+| [Claude Code](https://code.claude.com) | `~/.claude.json` | JSON, `mcpServers` |
+| [Codex CLI](https://github.com/openai/codex) | `~/.codex/config.toml` | TOML, `[mcp_servers.<name>]` |
+| [Antigravity](https://antigravity.google) | `~/.gemini/config/mcp_config.json` | JSON, `mcpServers` |
 
-| Agent | Config file |
-|---|---|
-| Claude Code | `~/.claude.json` (`mcpServers`) |
-| Codex CLI | `~/.codex/config.toml` (`[mcp_servers.<name>]`) |
-| Antigravity | `~/.gemini/config/mcp_config.json` (`mcpServers`) |
-
-Adding another agent is one new adapter file (see `mcp_hub/adapters/`); the
+Adding another agent is one new adapter file under `mcp_hub/adapters/`; the
 rest of the app doesn't need to change.
+
+## Configuration
+
+mcp-hub's own settings (language, theme) live in
+`~/.config/mcp-hub/settings.json` and are written automatically — nothing to
+configure by hand. The bundled MCP server catalog is
+[`mcp_hub/catalog.yaml`](mcp_hub/catalog.yaml).
 
 ## Development
 
@@ -60,6 +96,12 @@ python3.11 -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 .venv/bin/pytest
 ```
+
+## Contributing
+
+Issues and PRs welcome. Keep changes covered by tests (`pytest`) and follow
+the existing adapter/screen structure — see `mcp_hub/adapters/` for the
+pattern a new agent adapter should follow.
 
 ## License
 
