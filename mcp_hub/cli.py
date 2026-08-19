@@ -1,2 +1,4 @@
 def main(argv: list[str] | None = None) -> None:
-    print("mcp-hub: starting TUI...")
+    from mcp_hub.tui.app import McpHubApp
+
+    McpHubApp().run()
