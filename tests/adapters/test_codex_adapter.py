@@ -61,3 +61,21 @@ def test_list_servers_flags_malformed_toml(tmp_path):
     entries = CodexAdapter(config_path=path).list_servers()
     assert len(entries) == 1
     assert entries[0].valid is False
+
+
+def test_list_servers_flags_one_broken_entry_without_losing_others(tmp_path):
+    path = tmp_path / "config.toml"
+    path.write_text(
+        "[mcp_servers.existing]\n"
+        'command = "foo"\n'
+        'args = []\n\n'
+        "[mcp_servers]\n"
+        'broken = "not-a-table"\n'
+    )
+
+    entries = CodexAdapter(config_path=path).list_servers()
+
+    by_name = {e.name: e for e in entries}
+    assert by_name["existing"].valid is True
+    assert by_name["broken"].valid is False
+    assert by_name["broken"].error is not None

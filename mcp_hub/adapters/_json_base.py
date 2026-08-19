@@ -26,12 +26,18 @@ class JsonMcpServersAdapter:
 
         entries = []
         for name, cfg in data.get("mcpServers", {}).items():
-            entries.append(ServerEntry(
-                name=name,
-                command=cfg.get("command", ""),
-                args=list(cfg.get("args", [])),
-                env=dict(cfg.get("env", {})),
-            ))
+            try:
+                entries.append(ServerEntry(
+                    name=name,
+                    command=cfg.get("command") or "",
+                    args=list(cfg.get("args") or []),
+                    env=dict(cfg.get("env") or {}),
+                ))
+            except (AttributeError, TypeError) as exc:
+                entries.append(ServerEntry(
+                    name=name, command="", args=[], env={},
+                    valid=False, error=str(exc),
+                ))
         return entries
 
     def add_server(self, spec: ServerSpec) -> None:

@@ -50,6 +50,39 @@ def test_list_servers_flags_malformed_json(tmp_path):
     assert entries[0].error is not None
 
 
+def test_list_servers_treats_null_args_and_env_as_empty(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({
+        "mcpServers": {
+            "nullish": {"command": "npx", "args": None, "env": None},
+        },
+    }))
+
+    entries = DummyAdapter(path).list_servers()
+
+    assert len(entries) == 1
+    assert entries[0].valid is True
+    assert entries[0].args == []
+    assert entries[0].env == {}
+
+
+def test_list_servers_flags_one_broken_entry_without_losing_others(tmp_path):
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps({
+        "mcpServers": {
+            "good": {"command": "npx", "args": [], "env": {}},
+            "broken": "not-a-dict",
+        },
+    }))
+
+    entries = DummyAdapter(path).list_servers()
+
+    by_name = {e.name: e for e in entries}
+    assert by_name["good"].valid is True
+    assert by_name["broken"].valid is False
+    assert by_name["broken"].error is not None
+
+
 def test_add_server_writes_new_entry_and_backup(config_path):
     adapter = DummyAdapter(config_path)
     adapter.add_server(ServerSpec(name="new", command="npx", args=["-y", "pkg"], env={"KEY": "val"}))
