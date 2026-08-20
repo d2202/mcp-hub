@@ -39,13 +39,23 @@ three different formats.
 ## Installation
 
 ```bash
+pip install mcp-hub-tui
+mcp-hub
+```
+
+Requires Python 3.11+. Published on PyPI as `mcp-hub-tui` (the `mcp-hub`
+name was taken); the command is still `mcp-hub`.
+
+### From source
+
+```bash
 git clone git@github.com:d2202/mcp-hub.git
 cd mcp-hub
 ./run.sh
 ```
 
 `run.sh` creates a `.venv` on first run, installs the package, and launches
-the TUI. Requires Python 3.11+.
+the TUI.
 
 ## Usage
 
