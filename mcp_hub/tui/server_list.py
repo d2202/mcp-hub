@@ -5,6 +5,7 @@ from textual.widgets import DataTable, Footer, Header
 
 from mcp_hub.adapters import AgentAdapter
 from mcp_hub.i18n import t
+from mcp_hub.models import ServerEntry
 from mcp_hub.tui.confirm import ConfirmScreen
 
 
@@ -12,13 +13,15 @@ class ServerListScreen(Screen):
     _BINDING_SPEC = [
         ("escape", "app.pop_screen", "key_back"),
         ("a", "add", "key_add_server"),
+        ("e", "edit", "key_edit_server"),
         ("r", "remove", "key_remove_selected"),
     ]
     BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
 
     class OpenAddWizard(Message):
-        def __init__(self, adapter: AgentAdapter) -> None:
+        def __init__(self, adapter: AgentAdapter, edit_entry: ServerEntry | None = None) -> None:
             self.adapter = adapter
+            self.edit_entry = edit_entry
             super().__init__()
 
     class RemoveRequested(Message):
@@ -54,15 +57,29 @@ class ServerListScreen(Screen):
                 key=entry.name,
             )
 
+    def _selected_name(self) -> str | None:
+        table = self.query_one(DataTable)
+        if table.cursor_row is None:
+            return None
+        row_key = table.coordinate_to_cell_key(table.cursor_coordinate).row_key
+        return row_key.value
+
     def action_add(self) -> None:
         self.post_message(self.OpenAddWizard(self.adapter))
 
-    def action_remove(self) -> None:
-        table = self.query_one(DataTable)
-        if table.cursor_row is None:
+    def action_edit(self) -> None:
+        server_name = self._selected_name()
+        if server_name is None:
             return
-        row_key = table.coordinate_to_cell_key(table.cursor_coordinate).row_key
-        server_name = row_key.value
+        entry = next((e for e in self.adapter.list_servers() if e.name == server_name), None)
+        if entry is None:
+            return
+        self.post_message(self.OpenAddWizard(self.adapter, edit_entry=entry))
+
+    def action_remove(self) -> None:
+        server_name = self._selected_name()
+        if server_name is None:
+            return
 
         def handle_confirm(confirmed: bool | None) -> None:
             if confirmed:

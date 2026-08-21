@@ -4,6 +4,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "key_quit": {"en": "Quit", "ru": "Выход"},
     "key_back": {"en": "Back", "ru": "Назад"},
     "key_add_server": {"en": "Add server", "ru": "Добавить сервер"},
+    "key_edit_server": {"en": "Edit selected", "ru": "Редактировать выбранное"},
     "key_remove_selected": {"en": "Remove selected", "ru": "Удалить выбранное"},
     "key_cancel": {"en": "Cancel", "ru": "Отмена"},
     "key_language": {"en": "Language", "ru": "Язык"},
@@ -35,6 +36,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "ru": "Целевые агенты (только найденные):",
     },
     "btn_add": {"en": "Add", "ru": "Добавить"},
+    "btn_save": {"en": "Save", "ru": "Сохранить"},
     "btn_yes": {"en": "Yes", "ru": "Да"},
     "btn_no": {"en": "No", "ru": "Нет"},
     "confirm_remove": {
@@ -58,6 +60,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "Keys:\n"
             "  enter  - open the selected row\n"
             "  a      - open the add wizard (from a server list)\n"
+            "  e      - edit the selected server (from a server list)\n"
             "  r      - remove the selected server (from a server list)\n"
             "  l      - toggle language (English / Russian)\n"
             "  ?      - this help screen\n"
@@ -83,6 +86,7 @@ STRINGS: dict[str, dict[str, str]] = {
             "Клавиши:\n"
             "  enter  - открыть выбранную строку\n"
             "  a      - открыть мастер добавления (из списка серверов)\n"
+            "  e      - редактировать выбранный сервер (из списка серверов)\n"
             "  r      - удалить выбранный сервер (из списка серверов)\n"
             "  l      - переключить язык (English / Русский)\n"
             "  ?      - этот экран справки\n"

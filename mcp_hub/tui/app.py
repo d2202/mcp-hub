@@ -60,8 +60,7 @@ class McpHubApp(App):
         self.push_screen(ServerListScreen(message.adapter))
 
     def on_server_list_screen_open_add_wizard(self, message: ServerListScreen.OpenAddWizard) -> None:
-        self._pending_adapter = message.adapter
-        self.push_screen(AddWizardScreen())
+        self.push_screen(AddWizardScreen(adapter=message.adapter, edit_entry=message.edit_entry))
 
     def on_server_list_screen_remove_requested(self, message: ServerListScreen.RemoveRequested) -> None:
         message.adapter.remove_server(message.server_name)
