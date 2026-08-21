@@ -43,6 +43,10 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Remove server '{name}'? A .bak copy of the config is kept.",
         "ru": "Удалить сервер '{name}'? Сохранится .bak копия конфига.",
     },
+    "confirm_overwrite": {
+        "en": "A server named '{name}' already exists. Overwrite it?",
+        "ru": "Сервер с именем '{name}' уже существует. Перезаписать?",
+    },
     "help_title": {"en": "mcp-hub help", "ru": "Справка mcp-hub"},
     "help_body": {
         "en": (
