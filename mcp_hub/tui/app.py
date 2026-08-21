@@ -1,3 +1,4 @@
+from textual import events
 from textual.app import App
 
 from mcp_hub import i18n, settings
@@ -9,6 +10,16 @@ from mcp_hub.tui.server_list import ServerListScreen
 
 _TRANSLATABLE_SCREENS = (DashboardScreen, ServerListScreen, AddWizardScreen, HelpScreen)
 
+# ЙЦУКЕН -> QWERTY, so single-letter bindings still fire when the terminal is
+# sending RU-layout characters (the driver reports the character the layout
+# produced, not the physical key).
+_RU_TO_EN_KEY = {
+    "й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i", "щ": "o", "з": "p",
+    "ф": "a", "ы": "s", "в": "d", "а": "f", "п": "g", "р": "h", "о": "j", "л": "k", "д": "l",
+    "я": "z", "ч": "x", "с": "c", "м": "v", "и": "b", "т": "n", "ь": "m",
+}
+_RU_TO_EN_KEY.update({k.upper(): v.upper() for k, v in _RU_TO_EN_KEY.items()})
+
 
 class McpHubApp(App):
     TITLE = "mcp-hub"
@@ -17,6 +28,12 @@ class McpHubApp(App):
         ("?", "help", "key_help"),
     ]
     BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
+
+    async def _on_key(self, event: events.Key) -> None:
+        mapped = _RU_TO_EN_KEY.get(event.key)
+        if mapped is not None:
+            event = events.Key(mapped, mapped)
+        await super()._on_key(event)
 
     def on_mount(self) -> None:
         i18n.load_language()
