@@ -29,11 +29,19 @@ class McpHubApp(App):
     ]
     BINDINGS = [(k, a, t(i)) for k, a, i in _BINDING_SPEC]
 
-    async def _on_key(self, event: events.Key) -> None:
-        mapped = _RU_TO_EN_KEY.get(event.key)
-        if mapped is not None:
-            event = events.Key(mapped, mapped)
-        await super()._on_key(event)
+    async def on_event(self, event: events.Event) -> None:
+        # Textual's dispatcher calls every _on_key defined anywhere in the
+        # MRO (not just the most-derived one), so overriding _on_key here
+        # and calling super()._on_key() would run the base App._on_key
+        # twice per keystroke (once via our call, once via the dispatcher's
+        # own separate walk) -- doubling every cursor move. on_event is
+        # invoked through plain polymorphism instead, so remapping here
+        # runs exactly once.
+        if isinstance(event, events.Key):
+            mapped = _RU_TO_EN_KEY.get(event.key)
+            if mapped is not None:
+                event = events.Key(mapped, mapped)
+        await super().on_event(event)
 
     def on_mount(self) -> None:
         i18n.load_language()
