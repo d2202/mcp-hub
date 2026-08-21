@@ -29,8 +29,12 @@ three different formats.
   file even parses, in one table.
 - **Add wizard** — pick a server from the bundled catalog or enter one by
   hand, choose which detected agents to write it to, confirm.
-- **Safe writes** — every add or remove backs up the config file (`.bak`)
-  before touching it, and never crashes on a malformed or empty config.
+- **Edit in place** — update a server's command, args, or env (and rename
+  it) without deleting and re-adding it; asks before overwriting another
+  server with the same name.
+- **Safe writes** — every add, edit, or remove backs up the config file
+  (`.bak`) before touching it, and never crashes on a malformed or empty
+  config.
 - **Confirm before delete** — removing a server asks first.
 - **i18n** — full English/Russian UI, toggle at runtime with `l`.
 - **Themeable** — built-in Textual command palette (`ctrl+p`); your choice
@@ -67,6 +71,9 @@ Launch with `./run.sh`, then:
    entries show why parsing failed instead of crashing.
 3. **Add Wizard** (`a`) — pick a server from the bundled catalog or enter
    one by hand, choose target agents, confirm.
+4. **Edit** (`e`) — opens the same wizard pre-filled with the selected
+   server's command/args/env, scoped to the agent it's already on.
+   Renaming asks to confirm if the new name collides with another server.
 
 ### Keybindings
 
@@ -74,6 +81,7 @@ Launch with `./run.sh`, then:
 |---|---|
 | `enter` | open the selected row |
 | `a` | add server (from a server list) |
+| `e` | edit selected server (from a server list) |
 | `r` | remove server, asks to confirm (from a server list) |
 | `l` | toggle language (English / Russian) |
 | `?` | help screen |
